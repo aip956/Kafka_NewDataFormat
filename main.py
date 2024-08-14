@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 from datetime import datetime, timedelta
+import random
 
 
 # KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "default_topic")
@@ -42,7 +43,8 @@ async def handle_event(event):
     timeout = PRIORITY_TIMEFRAMES[event['priority']]
 
     # Simulate processing
-    await asyncio.sleep(timeout)
+    processing_time = random.randint(1, 20)
+    await asyncio.sleep(processing_time)
 
     elapsed_time = (datetime.now() - start_time).seconds
     if elapsed_time > timeout:
