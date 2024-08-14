@@ -21,14 +21,57 @@ worker_routine = {"Security": "Standard", "Clean_Up": "Standard", "Catering": "I
 events = []
 stress_level = 0
 
-# Timeframes for priorities in secx
+# Timeframes for priorities in secs
 PRIORITY_TIMEFRAMES = {
     "High": 5,
     "Medium": 10,
     "Low": 15
 }
 
+# Timeframes for worker routines in secs
+ROUTINE_TIMEFRAMES = {
+    "Standard": (20, 5),
+    "Intermittent": (5, 5),
+    "Concentrated": (60, 60)
+}
 
+# Event handler function
+async def handle_event(event):
+    global stress_level
+    start_time = datetime.now()
+    timeout = PRIORITY_TIMEFRAMES[event['priority']]
+
+    # Simulate processing
+    await asyncio.sleep(timeout)
+
+    elapsed_time = (datetime.now() - start_time).seconds
+    if elapsed_time > timeout:
+        stress_level += 1
+        logger.info(f"Event {event['event_type']} not handled in time. Stress level increased")
+    else:
+        logger.info(f"Event {event['event_type']} handled in time")
+
+    # Log event
+    events.append({"event": event, "handled": elapsed_time <= timeout})
+
+@app.post("/send_event/")
+async def produce_event(event_type: str, priority: str, description: str, background_tasks: BackgroundTasks):
+    event = {
+        "event_type": event_type,
+        "priority": priority,
+        "description": description
+    }
+    background_tasks.add_task(handle_event, event)
+    logger.info(f"Event received: {event}")
+    return {"message": "Event received"}
+
+@app.get("/stress_level")
+def get_stress_level():
+    return {"stress_level": stress_level}
+
+@app.get("/events")
+def get_events():
+    return {"events": events}
 
 # All the data topics
 topics = ["person_fell", "broken_glass", "dirty_table", "brawl", "missing_rings", "missing_bride", "missing_groom", "feeling_ill", "injured_kid", "not_on_list", "bad_food", "music_too_loud", "music_too_low"]
