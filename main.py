@@ -9,35 +9,9 @@ import os
 KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER", "localhost:9092")
 
 app = FastAPI()
-# logger = logging.getLogger(__name__)
+
 logger = logging.getLogger("uvicorn.error")
 
-# def read_events_data(file_path):
-#     with open(file_path, mode='r') as file:
-#         lines = file.readlines()
-
-
-#     events = []
-#     for i in range(0, len(lines), 4):
-#         if i + 3 < len(lines):
-#             index = lines[i].strip()
-#             event_type = lines[i + 1].split('\t')[1].strip('"\n ')
-#             priority = lines[i + 2].split('\t')[1].strip('"\n ')
-#             description = lines[i + 3].split('\t')[1].strip('"\n ')
-#             events.append({
-#                 'index': index,
-#                 'event_type': event_type,
-#                 'priority': priority,
-#                 'description': description
-#             })
-#         else:
-#             print(f"Incomplete event datastarting at line {i}")
-#             # i += 5 # Move to next event block
-#     return events
-
-# events_data = read_events_data('events_data.txt')
-# for event in events_data:
-#     print (event)
 
 # All the data topics
 topics = ["person_fell", "broken_glass", "dirty_table", "brawl", "missing_rings", "missing_bride", "missing_groom", "feeling_ill", "injured_kid", "not_on_list", "bad_food", "music_too_loud", "music_too_low"]
