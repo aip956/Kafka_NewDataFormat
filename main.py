@@ -3,6 +3,7 @@ from aiokafka import AIOKafkaProducer, AIOKafkaConsumer, errors, AIOKafkaClient
 import asyncio
 import logging
 import os
+from datetime import datetime, timedelta
 
 
 # KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "default_topic")
@@ -11,6 +12,22 @@ KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER", "localhost:9092")
 app = FastAPI()
 
 logger = logging.getLogger("uvicorn.error")
+
+# Worker status and routines
+worker_status = {"Security": "Idle", "Clean_Up": "Idle", "Catering": "Idle", "Officiant": "Idle", "Waiters": "Idle"}
+worker_routine = {"Security": "Standard", "Clean_Up": "Standard", "Catering": "Intermittent", "Officiant": "Concentrated", "Waiters": "Standard"}
+
+# Track events and stress levels
+events = []
+stress_level = 0
+
+# Timeframes for priorities in secx
+PRIORITY_TIMEFRAMES = {
+    "High": 5,
+    "Medium": 10,
+    "Low": 15
+}
+
 
 
 # All the data topics
