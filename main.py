@@ -5,18 +5,20 @@ import logging
 import os
 from datetime import datetime, timedelta
 import random
+import json
 
 
 # KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "default_topic")
 KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER", "localhost:9092")
+TOPIC = "wedding_events"
 
 app = FastAPI()
 
 logger = logging.getLogger("uvicorn.error")
 
 # Worker status and routines
-worker_status = {"Security": "Idle", "Clean_Up": "Idle", "Catering": "Idle", "Officiant": "Idle", "Waiters": "Idle"}
-worker_routine = {"Security": "Standard", "Clean_Up": "Standard", "Catering": "Intermittent", "Officiant": "Concentrated", "Waiters": "Standard"}
+# worker_status = {"Security": "Idle", "Clean_Up": "Idle", "Catering": "Idle", "Officiant": "Idle", "Waiters": "Idle"}
+# worker_routine = {"Security": "Standard", "Clean_Up": "Standard", "Catering": "Intermittent", "Officiant": "Concentrated", "Waiters": "Standard"}
 
 # Track events and stress levels
 events = []
@@ -29,12 +31,16 @@ PRIORITY_TIMEFRAMES = {
     "Low": 15
 }
 
+# Initialize global vars for consuper and producer
+producer = None
+consumer = None
+
 # Timeframes for worker routines in secs
-ROUTINE_TIMEFRAMES = {
-    "Standard": (20, 5),
-    "Intermittent": (5, 5),
-    "Concentrated": (60, 60)
-}
+# ROUTINE_TIMEFRAMES = {
+#     "Standard": (20, 5),
+#     "Intermittent": (5, 5),
+#     "Concentrated": (60, 60)
+# }
 
 # Event handler function
 async def handle_event(event):
@@ -56,16 +62,49 @@ async def handle_event(event):
     # Log event
     events.append({"event": event, "handled": elapsed_time <= timeout})
 
-@app.post("/send_event/")
-async def produce_event(event_type: str, priority: str, description: str, background_tasks: BackgroundTasks):
-    event = {
-        "event_type": event_type,
-        "priority": priority,
-        "description": description
-    }
-    background_tasks.add_task(handle_event, event)
-    logger.info(f"Event received: {event}")
-    return {"message": "Event received"}
+
+# Kafka consumer function
+async def consume_events():
+    consumer = AIOKafkaConsumer(
+        TOPIC,
+        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+        group_id = "wedding_group"
+    )
+    await consumer.start()
+    try:
+        async for msg in consumer:
+            event = json.loads(msg.value.decode("utf-8"))
+            await handle_event(event)
+            logger.info(f"Consumed and processed event: {event['event_type']}")
+    finally:
+        await consumer.stop()
+
+@app.on_event("startup")
+async def on_startup():
+    global producer
+    producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
+    await producer.start() # Start the Kafka producer
+    asyncio.create_task(consume_events()) #Start consuming Kafka events
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    if producer:
+        await producer.stop() # Stop the Kafka producer
+    if consumer:
+        await consumer.stop() # Stop the Kafka consumer
+    logger.info("Kafka producer stopped")
+
+
+# @app.post("/send_event/")
+# async def produce_event(event_type: str, priority: str, description: str, background_tasks: BackgroundTasks):
+#     event = {
+#         "event_type": event_type,
+#         "priority": priority,
+#         "description": description
+#     }
+#     background_tasks.add_task(handle_event, event)
+#     logger.info(f"Event received: {event}")
+#     return {"message": "Event received"}
 
 @app.get("/stress_level")
 def get_stress_level():
@@ -94,147 +133,144 @@ catering_messages = []
 officiant_messages = []
 waiters_messages = []
 
-@app.on_event("startup")
-async def on_startup():
-    try:
-        await producer.start()
-        logger.info("Kafka producer started")
-        asyncio.create_task(consume_all())
-        asyncio.create_task(consume_security())
-        asyncio.create_task(consume_clean_up())
-        asyncio.create_task(consume_catering())
-        asyncio.create_task(consume_officiant())
-        asyncio.create_task(consume_waiters())
-        logger.info("Kafka consumer tasks created")
-    except errors.KafkaConnectionError as e:
-        logger.error(f"Kafka connection error: {e}")
-
-@app.on_event("shutdown")
-async def on_shutdown():
-    await producer.stop()
-    logger.info("Kafka producer stopped")
-
-@app.post("/send/{topic}")
-async def produce(topic: str, message: str):
-    try:
-        await producer.send_and_wait(topic, message.encode('utf-8'))
-        logger.info(f"Produced message: {message} to topic: {topic}")
-        return {"message": "Message sent successfully"}
-    except errors.KafkaConnectionError as e:
-        logger.error(f"Kafka connection error: {e}")
-        return {"message": "Failed to send message"}
-
-async def consume_all():
-    consumer = AIOKafkaConsumer(
-        *topics, # Unpack all topic names
-        loop=loop,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-        group_id= "AllConsumers",
-        session_timeout_ms = 10000, # 6 seconds
-        heartbeat_interval_ms = 3000, # 2 seconds
-    )
-    await consumer.start()
-    try:
-        async for msg in consumer:
-            message = msg.value.decode('utf-8')
-            topic = msg.topic
-            consumed_messages.append({"topic": topic, "message": message})
-            logger.info(f"Consumed_all message: {message} from topic: {topic}")
-    except Exception as e:
-        logger.error(f"Error occurred: {e}")
-    finally:
-        await consumer.stop()
-
-async def consume_security():
-    consumer = AIOKafkaConsumer(
-        *SECURITY_TOPICS,
-        loop=loop,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-        group_id="Security")
-    await consumer.start()
-    try:
-        async for msg in consumer:
-            message = msg.value.decode('utf-8')
-            topic = msg.topic
-            security_messages.append({"topic": topic, "message": message})
-            logger.info(f"Security message: {message} from topic: {topic}")
-    except Exception as e:
-        logger.error(f"Error occurred: {e}")
-    finally:
-        await consumer.stop()
-
-async def consume_clean_up():
-    consumer = AIOKafkaConsumer(
-        *CLEAN_UP_TOPICS,
-        loop=loop,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-        group_id="Clean_Up")
-    await consumer.start()
-    try:
-        async for msg in consumer:
-            message = msg.value.decode('utf-8')
-            topic = msg.topic
-            clean_up_messages.append({"topic": topic, "message": message})
-            logger.info(f"Clean_Up message: {message} from topic: {topic}")
-    except Exception as e:
-        logger.error(f"Error occurred: {e}")
-    finally:
-        await consumer.stop()
+# @app.on_event("startup")
+# async def on_startup():
+#     try:
+#         await producer.start()
+#         logger.info("Kafka producer started")
+#         asyncio.create_task(consume_all())
+#         asyncio.create_task(consume_security())
+#         asyncio.create_task(consume_clean_up())
+#         asyncio.create_task(consume_catering())
+#         asyncio.create_task(consume_officiant())
+#         asyncio.create_task(consume_waiters())
+#         logger.info("Kafka consumer tasks created")
+#     except errors.KafkaConnectionError as e:
+#         logger.error(f"Kafka connection error: {e}")
 
 
-async def consume_catering():
-    consumer = AIOKafkaConsumer(
-        *CATERING_TOPICS, #Sub in KAFA_TOPIC later
-        loop=loop,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-        group_id="Catering")
-    await consumer.start()
-    try:
-        async for msg in consumer:
-            message = msg.value.decode('utf-8')
-            topic = msg.topic
-            catering_messages.append({"topic": topic, "message": message})
-            logger.info(f"Catering message: {message} from topic: {topic}")
-    except Exception as e:
-        logger.error(f"Error occurred: {e}")
-    finally:
-        await consumer.stop()
 
-async def consume_officiant():
-    consumer = AIOKafkaConsumer(
-        *OFFICIANT_TOPICS,
-        loop=loop,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-        group_id="Officiant")
-    await consumer.start()
-    try:
-        async for msg in consumer:
-            message = msg.value.decode('utf-8')
-            topic = msg.topic
-            officiant_messages.append({"topic": topic, "message": message})
-            logger.info(f"Officiant message: {message} from topic: {topic}")
-    except Exception as e:
-        logger.error(f"Error occurred: {e}")
-    finally:
-        await consumer.stop()
+# @app.post("/send/{topic}")
+# async def produce(topic: str, message: str):
+#     try:
+#         await producer.send_and_wait(topic, message.encode('utf-8'))
+#         logger.info(f"Produced message: {message} to topic: {topic}")
+#         return {"message": "Message sent successfully"}
+#     except errors.KafkaConnectionError as e:
+#         logger.error(f"Kafka connection error: {e}")
+#         return {"message": "Failed to send message"}
 
-async def consume_waiters():
-    consumer = AIOKafkaConsumer(
-        *WAITERS_TOPICS,
-        loop=loop,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-        group_id="Waiters")
-    await consumer.start()
-    try:
-        async for msg in consumer:
-            message = msg.value.decode('utf-8')
-            topic = msg.topic
-            waiters_messages.append({"topic": topic, "message": message})
-            logger.info(f"Waiting message: {message} from topic: {topic}")
-    except Exception as e:
-        logger.error(f"Error occurred: {e}")
-    finally:
-        await consumer.stop()
+# async def consume_all():
+#     consumer = AIOKafkaConsumer(
+#         *topics, # Unpack all topic names
+#         loop=loop,
+#         bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+#         group_id= "AllConsumers",
+#         session_timeout_ms = 10000, # 6 seconds
+#         heartbeat_interval_ms = 3000, # 2 seconds
+#     )
+    # await consumer.start()
+    # try:
+    #     async for msg in consumer:
+    #         message = msg.value.decode('utf-8')
+    #         topic = msg.topic
+    #         consumed_messages.append({"topic": topic, "message": message})
+    #         logger.info(f"Consumed_all message: {message} from topic: {topic}")
+    # except Exception as e:
+    #     logger.error(f"Error occurred: {e}")
+    # finally:
+    #     await consumer.stop()
+
+# async def consume_security():
+#     consumer = AIOKafkaConsumer(
+#         *SECURITY_TOPICS,
+#         loop=loop,
+#         bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+#         group_id="Security")
+#     await consumer.start()
+#     try:
+#         async for msg in consumer:
+#             message = msg.value.decode('utf-8')
+#             topic = msg.topic
+#             security_messages.append({"topic": topic, "message": message})
+#             logger.info(f"Security message: {message} from topic: {topic}")
+#     except Exception as e:
+#         logger.error(f"Error occurred: {e}")
+#     finally:
+#         await consumer.stop()
+
+# async def consume_clean_up():
+#     consumer = AIOKafkaConsumer(
+#         *CLEAN_UP_TOPICS,
+#         loop=loop,
+#         bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+#         group_id="Clean_Up")
+#     await consumer.start()
+#     try:
+#         async for msg in consumer:
+#             message = msg.value.decode('utf-8')
+#             topic = msg.topic
+#             clean_up_messages.append({"topic": topic, "message": message})
+#             logger.info(f"Clean_Up message: {message} from topic: {topic}")
+#     except Exception as e:
+#         logger.error(f"Error occurred: {e}")
+#     finally:
+#         await consumer.stop()
+
+
+# async def consume_catering():
+#     consumer = AIOKafkaConsumer(
+#         *CATERING_TOPICS, #Sub in KAFA_TOPIC later
+#         loop=loop,
+#         bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+#         group_id="Catering")
+#     await consumer.start()
+#     try:
+#         async for msg in consumer:
+#             message = msg.value.decode('utf-8')
+#             topic = msg.topic
+#             catering_messages.append({"topic": topic, "message": message})
+#             logger.info(f"Catering message: {message} from topic: {topic}")
+#     except Exception as e:
+#         logger.error(f"Error occurred: {e}")
+#     finally:
+#         await consumer.stop()
+
+# async def consume_officiant():
+#     consumer = AIOKafkaConsumer(
+#         *OFFICIANT_TOPICS,
+#         loop=loop,
+#         bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+#         group_id="Officiant")
+#     await consumer.start()
+#     try:
+#         async for msg in consumer:
+#             message = msg.value.decode('utf-8')
+#             topic = msg.topic
+#             officiant_messages.append({"topic": topic, "message": message})
+#             logger.info(f"Officiant message: {message} from topic: {topic}")
+#     except Exception as e:
+#         logger.error(f"Error occurred: {e}")
+#     finally:
+#         await consumer.stop()
+
+# async def consume_waiters():
+#     consumer = AIOKafkaConsumer(
+#         *WAITERS_TOPICS,
+#         loop=loop,
+#         bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+#         group_id="Waiters")
+#     await consumer.start()
+#     try:
+#         async for msg in consumer:
+#             message = msg.value.decode('utf-8')
+#             topic = msg.topic
+#             waiters_messages.append({"topic": topic, "message": message})
+#             logger.info(f"Waiting message: {message} from topic: {topic}")
+#     except Exception as e:
+#         logger.error(f"Error occurred: {e}")
+#     finally:
+#         await consumer.stop()
 
 
 @app.get("/messages")
