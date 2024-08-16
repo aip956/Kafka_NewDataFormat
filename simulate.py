@@ -1,6 +1,7 @@
 import requests
 import time
 import urllib.parse
+from asyncio import AIOKafkaProducer
 
 # Base URL for the FastAPI App
 base_url = "http://localhost:8000/send_event/"
