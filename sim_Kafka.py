@@ -1,6 +1,7 @@
 import asyncio
 from aiokafka import AIOKafkaProducer
 import json
+import argparse
 
 KAFKA_BOOTSTRAP_SERVER = "localhost:9092"
 TOPIC = "wedding_events"
@@ -44,4 +45,7 @@ def read_events_data(file_path):
     return events
 
 if __name__=="__main__":
-    asyncio.run(run_simulation('events_data.txt'))
+    parser = argparse.ArgumentParser(description="Run Kafka Simulation with a data file")
+    parser.add_argument('file_path', type=str, help="Path to the events data file")
+    args = parser.parse_args()
+    asyncio.run(run_simulation(args.file_path))

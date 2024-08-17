@@ -1,0 +1,149 @@
+	
+0	
+event_type	"not_on_list"
+priority	"High"
+description	"Miscommunication led to insufficient chairs for guests"
+1	
+event_type	"not_on_list"
+priority	"Medium"
+description	"Vendor mix-up with cake flavors"
+2	
+event_type	"bride"
+priority	"Medium"
+description	"Guest feeling nauseous after eating undercooked meat"
+3	
+event_type	"accident"
+priority	"Low"
+description	"Missing groom's ring moments before the ceremony"
+4	
+event_type	"bad_food"
+priority	"Medium"
+description	"Miscommunication led to insufficient chairs for guests"
+5	
+event_type	"bad_food"
+priority	"Medium"
+description	"Disorganized valet parking causing delays in car retrieval"
+6	
+event_type	"broken_itens"
+priority	"High"
+description	"Vendor mix-up with cake flavors"
+7	
+event_type	"bride"
+priority	"High"
+description	"Wrong song played during first dance"
+8	
+event_type	"broken_itens"
+priority	"High"
+description	"Disorganized valet parking causing delays in car retrieval"
+9	
+event_type	"feeling_ill"
+priority	"Low"
+description	"Missing groom's ring moments before the ceremony"
+10	
+event_type	"groom"
+priority	"Medium"
+description	"Miscommunication led to insufficient chairs for guests"
+11	
+event_type	"groom"
+priority	"High"
+description	"Miscommunication led to insufficient chairs for guests"
+12	
+event_type	"dirty_table"
+priority	"Low"
+description	"Guest spilled red wine on their white dress"
+13	
+event_type	"accident"
+priority	"Low"
+description	"Guest having difficulty breathing due to pollen allergy"
+14	
+event_type	"feeling_ill"
+priority	"Medium"
+description	"Disorganized valet parking causing delays in car retrieval"
+15	
+event_type	"groom"
+priority	"High"
+description	"Dirty footprints noticed on the dance floor"
+16	
+event_type	"groom"
+priority	"High"
+description	"Vendor mix-up with cake flavors"
+17	
+event_type	"broken_itens"
+priority	"High"
+description	"Guest spilled red wine on their white dress"
+18	
+event_type	"music"
+priority	"Medium"
+description	"Dirty footprints noticed on the dance floor"
+19	
+event_type	"dirty_floor"
+priority	"Medium"
+description	"Miscommunication led to insufficient chairs for guests"
+20	
+event_type	"dirty_floor"
+priority	"Low"
+description	"Wrong song played during first dance"
+21	
+event_type	"groom"
+priority	"High"
+description	"Missing name tags for reserved seats"
+22	
+event_type	"broken_itens"
+priority	"Medium"
+description	"Wrong song played during first dance"
+23	
+event_type	"groom"
+priority	"Medium"
+description	"Guest feeling nauseous after eating undercooked meat"
+24	
+event_type	"broken_itens"
+priority	"High"
+description	"Photographer's assistant forgot to bring extra batteries"
+25	
+event_type	"groom"
+priority	"Low"
+description	"Vendor mix-up with cake flavors"
+26	
+event_type	"feeling_ill"
+priority	"Low"
+description	"Guest having difficulty breathing due to pollen allergy"
+27	
+event_type	"brawl"
+priority	"Medium"
+description	"Miscommunication led to insufficient chairs for guests"
+28	
+event_type	"dirty_table"
+priority	"Low"
+description	"Wrong song played during first dance"
+29	
+event_type	"groom"
+priority	"Medium"
+description	"Guest feeling nauseous after eating undercooked meat"
+30	
+event_type	"broken_itens"
+priority	"Medium"
+description	"Disorganized valet parking causing delays in car retrieval"
+31	
+event_type	"bride"
+priority	"Low"
+description	"Disorganized valet parking causing delays in car retrieval"
+32	
+event_type	"broken_itens"
+priority	"Low"
+description	"Missing groom's ring moments before the ceremony"
+33	
+event_type	"bad_food"
+priority	"Medium"
+description	"Disorganized valet parking causing delays in car retrieval"
+34	
+event_type	"bad_food"
+priority	"Medium"
+description	"Disorganized valet parking causing delays in car retrieval"
+35	
+event_type	"bride"
+priority	"High"
+description	"Miscommunication led to insufficient chairs for guests"
+36	
+event_type	"accident"
+priority	"Low"
+description	"Missing name tags for reserved seats"
