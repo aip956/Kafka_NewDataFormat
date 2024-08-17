@@ -1,0 +1,161 @@
+	
+0	
+event_type	"brawl"
+priority	"Low"
+description	"Dirty footprints noticed on the dance floor"
+1	
+event_type	"groom"
+priority	"High"
+description	"Guest having difficulty breathing due to pollen allergy"
+2	
+event_type	"dirty_floor"
+priority	"High"
+description	"Guest feeling nauseous after eating undercooked meat"
+3	
+event_type	"feeling_ill"
+priority	"Medium"
+description	"Dirty footprints noticed on the dance floor"
+4	
+event_type	"dirty_table"
+priority	"Medium"
+description	"Missing table settings for head table"
+5	
+event_type	"brawl"
+priority	"High"
+description	"Missing groom's ring moments before the ceremony"
+6	
+event_type	"accident"
+priority	"High"
+description	"Dirty footprints noticed on the dance floor"
+7	
+event_type	"accident"
+priority	"High"
+description	"Guest having difficulty breathing due to pollen allergy"
+8	
+event_type	"broken_itens"
+priority	"High"
+description	"Missing name tags for reserved seats"
+9	
+event_type	"accident"
+priority	"Medium"
+description	"Wrong song played during first dance"
+10	
+event_type	"not_on_list"
+priority	"Medium"
+description	"Guest spilled red wine on their white dress"
+11	
+event_type	"bride"
+priority	"Low"
+description	"Missing table settings for head table"
+12	
+event_type	"dirty_floor"
+priority	"Low"
+description	"Guest having difficulty breathing due to pollen allergy"
+13	
+event_type	"accident"
+priority	"Low"
+description	"Missing name tags for reserved seats"
+14	
+event_type	"broken_itens"
+priority	"Low"
+description	"Guest feeling nauseous after eating undercooked meat"
+15	
+event_type	"broken_itens"
+priority	"High"
+description	"Disorganized valet parking causing delays in car retrieval"
+16	
+event_type	"dirty_table"
+priority	"High"
+description	"Guest spilled red wine on their white dress"
+17	
+event_type	"accident"
+priority	"Low"
+description	"Dirty footprints noticed on the dance floor"
+18	
+event_type	"dirty_table"
+priority	"High"
+description	"Guest feeling nauseous after eating undercooked meat"
+19	
+event_type	"broken_itens"
+priority	"High"
+description	"Guest feeling nauseous after eating undercooked meat"
+20	
+event_type	"brawl"
+priority	"Low"
+description	"Guest feeling nauseous after eating undercooked meat"
+21	
+event_type	"bad_food"
+priority	"Medium"
+description	"Dirty footprints noticed on the dance floor"
+22	
+event_type	"music"
+priority	"Medium"
+description	"Wrong song played during first dance"
+23	
+event_type	"bad_food"
+priority	"Medium"
+description	"Guest spilled red wine on their white dress"
+24	
+event_type	"groom"
+priority	"Medium"
+description	"Disorganized valet parking causing delays in car retrieval"
+25	
+event_type	"feeling_ill"
+priority	"Medium"
+description	"Wrong song played during first dance"
+26	
+event_type	"accident"
+priority	"Medium"
+description	"Dirty footprints noticed on the dance floor"
+27	
+event_type	"broken_itens"
+priority	"High"
+description	"Miscommunication led to insufficient chairs for guests"
+28	
+event_type	"bride"
+priority	"High"
+description	"Dirty footprints noticed on the dance floor"
+29	
+event_type	"feeling_ill"
+priority	"High"
+description	"Missing table settings for head table"
+30	
+event_type	"bad_food"
+priority	"Medium"
+description	"Dirty footprints noticed on the dance floor"
+31	
+event_type	"groom"
+priority	"Low"
+description	"Guest feeling nauseous after eating undercooked meat"
+32	
+event_type	"bad_food"
+priority	"Low"
+description	"Vendor mix-up with cake flavors"
+33	
+event_type	"dirty_table"
+priority	"High"
+description	"Guest having difficulty breathing due to pollen allergy"
+34	
+event_type	"groom"
+priority	"Medium"
+description	"Vendor mix-up with cake flavors"
+35	
+event_type	"accident"
+priority	"Medium"
+description	"Wrong song played during first dance"
+36	
+event_type	"not_on_list"
+priority	"High"
+description	"Guest spilled red wine on their white dress"
+37	
+event_type	"bride"
+priority	"Medium"
+description	"Missing name tags for reserved seats"
+38	
+event_type	"not_on_list"
+priority	"High"
+description	"Photographer's assistant forgot to bring extra batteries"
+39	
+event_type	"bride"
+priority	"High"
+description	"Disorganized valet parking causing delays in car retrieval"

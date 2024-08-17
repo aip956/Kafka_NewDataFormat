@@ -1,0 +1,161 @@
+	
+0	
+event_type	"accident"
+priority	"Low"
+description	"Dirty footprints noticed on the dance floor"
+1	
+event_type	"groom"
+priority	"Low"
+description	"Missing groom's ring moments before the ceremony"
+2	
+event_type	"not_on_list"
+priority	"High"
+description	"Dirty footprints noticed on the dance floor"
+3	
+event_type	"bride"
+priority	"High"
+description	"Miscommunication led to insufficient chairs for guests"
+4	
+event_type	"bride"
+priority	"Low"
+description	"Wrong song played during first dance"
+5	
+event_type	"bride"
+priority	"High"
+description	"Wrong song played during first dance"
+6	
+event_type	"accident"
+priority	"Low"
+description	"Missing name tags for reserved seats"
+7	
+event_type	"broken_itens"
+priority	"High"
+description	"Missing table settings for head table"
+8	
+event_type	"broken_itens"
+priority	"Medium"
+description	"Missing name tags for reserved seats"
+9	
+event_type	"not_on_list"
+priority	"High"
+description	"Vendor mix-up with cake flavors"
+10	
+event_type	"broken_itens"
+priority	"High"
+description	"Guest having difficulty breathing due to pollen allergy"
+11	
+event_type	"broken_itens"
+priority	"High"
+description	"Vendor mix-up with cake flavors"
+12	
+event_type	"accident"
+priority	"High"
+description	"Guest having difficulty breathing due to pollen allergy"
+13	
+event_type	"groom"
+priority	"High"
+description	"Guest feeling nauseous after eating undercooked meat"
+14	
+event_type	"bride"
+priority	"High"
+description	"Vendor mix-up with cake flavors"
+15	
+event_type	"not_on_list"
+priority	"Medium"
+description	"Guest feeling nauseous after eating undercooked meat"
+16	
+event_type	"accident"
+priority	"High"
+description	"Dirty footprints noticed on the dance floor"
+17	
+event_type	"bride"
+priority	"Low"
+description	"Guest feeling nauseous after eating undercooked meat"
+18	
+event_type	"broken_itens"
+priority	"Low"
+description	"Wrong song played during first dance"
+19	
+event_type	"bad_food"
+priority	"Medium"
+description	"Disorganized valet parking causing delays in car retrieval"
+20	
+event_type	"bad_food"
+priority	"Low"
+description	"Missing groom's ring moments before the ceremony"
+21	
+event_type	"brawl"
+priority	"Low"
+description	"Guest having difficulty breathing due to pollen allergy"
+22	
+event_type	"feeling_ill"
+priority	"High"
+description	"Missing groom's ring moments before the ceremony"
+23	
+event_type	"bad_food"
+priority	"Low"
+description	"Missing name tags for reserved seats"
+24	
+event_type	"broken_itens"
+priority	"High"
+description	"Wrong song played during first dance"
+25	
+event_type	"groom"
+priority	"Medium"
+description	"Miscommunication led to insufficient chairs for guests"
+26	
+event_type	"feeling_ill"
+priority	"High"
+description	"Vendor mix-up with cake flavors"
+27	
+event_type	"dirty_table"
+priority	"Low"
+description	"Vendor mix-up with cake flavors"
+28	
+event_type	"groom"
+priority	"Low"
+description	"Vendor mix-up with cake flavors"
+29	
+event_type	"not_on_list"
+priority	"Low"
+description	"Guest feeling nauseous after eating undercooked meat"
+30	
+event_type	"accident"
+priority	"Medium"
+description	"Guest spilled red wine on their white dress"
+31	
+event_type	"bad_food"
+priority	"Medium"
+description	"Guest having difficulty breathing due to pollen allergy"
+32	
+event_type	"music"
+priority	"High"
+description	"Guest spilled red wine on their white dress"
+33	
+event_type	"not_on_list"
+priority	"High"
+description	"Vendor mix-up with cake flavors"
+34	
+event_type	"music"
+priority	"High"
+description	"Disorganized valet parking causing delays in car retrieval"
+35	
+event_type	"dirty_floor"
+priority	"High"
+description	"Guest spilled red wine on their white dress"
+36	
+event_type	"brawl"
+priority	"High"
+description	"Wrong song played during first dance"
+37	
+event_type	"groom"
+priority	"Medium"
+description	"Photographer's assistant forgot to bring extra batteries"
+38	
+event_type	"bad_food"
+priority	"Medium"
+description	"Photographer's assistant forgot to bring extra batteries"
+39	
+event_type	"bad_food"
+priority	"Low"
+description	"Guest feeling nauseous after eating undercooked meat"
