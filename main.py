@@ -115,12 +115,17 @@ def get_events():
     return {"events": events}
 
 # All the data topics
-topics = ["person_fell", "broken_glass", "dirty_table", "brawl", "missing_rings", "missing_bride", "missing_groom", "feeling_ill", "injured_kid", "not_on_list", "bad_food", "music_too_loud", "music_too_low"]
-SECURITY_TOPICS = ["brawl", "not_on_list", "person_fell", "injured_kid"]
-CLEAN_UP_TOPICS = ["dirty_table", "broken_glass"]
-CATERING_TOPICS = ["bad_food", "music_too_loud", "music_too_low", "feeling_ill"]
-OFFICIANT_TOPICS = ["missing_rings", "missing_bride", "missing_groom"]
-WAITERS_TOPICS = [ "broken_glass", "person_fell", "injured_kid", "feeling_ill"]
+# topics = ["person_fell", "broken_glass", "dirty_table", "brawl", "missing_rings", "missing_bride", "missing_groom", "feeling_ill", "injured_kid", "not_on_list", "bad_food", "music_too_loud", "music_too_low"]
+
+# New topics for v2 of assignment
+topics = ["brawl","not_on_list", "accident", "dirty_table", "broken_items", "dirty_floor", "bad_food", "music", "feeling_ill", "bride", "groom"]
+
+# SECURITY_TOPICS = ["brawl", "not_on_list", "person_fell", "injured_kid"]
+SECURITY_TOPICS = ["brawl", "not_on_list", "accident"]
+CLEAN_UP_TOPICS = ["dirty_table", "broken_items", "dirty_floor"] #Removed broken_glass, added dirty_floor
+CATERING_TOPICS = ["bad_food", "music", "feeling_ill"] #changed to just music
+OFFICIANT_TOPICS = ["bride", "groom"] # Changed to bride, groom
+WAITERS_TOPICS = [ "broken_items", "accident", "bad_food"]
 
 
 loop = asyncio.get_event_loop()

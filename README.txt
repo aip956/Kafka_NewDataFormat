@@ -23,6 +23,7 @@ python3 sim_Kafka.py events_data.txt
 sim_Kafka will run the data file
 events_data.txt is the data file
 
+
 Get the consumed messages:
 Get, execute
 {
