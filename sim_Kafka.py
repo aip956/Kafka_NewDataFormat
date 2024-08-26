@@ -33,18 +33,18 @@ def read_events_data(file_path):
     while i < len(lines):
         # Skip line if only a digit
         if lines[i].strip().isdigit():
+            print("digit only")
             i += 1
+            print(f"i: {i}")
             continue
         if i + 4 < len(lines):
             try:
                 index_line = lines[i].strip()
+                print(f"i, IndLine: {i}, {index_line}")
                 event_type_line = lines[i + 1].strip()
                 priority_line = lines[i + 2].strip()
                 description_line = lines[i + 3].strip()
                 timestamp_line = lines[i + 4].strip()
-
-
-
 
                 if not (index_line.startswith("id\t") and 
                         event_type_line.startswith("event_type\t") and 
@@ -52,7 +52,7 @@ def read_events_data(file_path):
                         description_line.startswith("description\t") and 
                         timestamp_line.startswith("timestamp\t")):
                     print(f"Unexpected format event data line {i}")
-                    print(f"index: {index_line}, event: {event_type_line}, priority: {priority_line}, desc: {description_line}, time: {timestamp_line}")
+                    print(f"index_ln: {index_line}, event_ln: {event_type_line}, priority_ln: {priority_line}, desc_ln: {description_line}, time_ln: {timestamp_line}")
                     i += 5
                     continue
 
@@ -60,14 +60,14 @@ def read_events_data(file_path):
                 event_type = event_type_line.split('\t')[1].strip('"\n ')
                 priority = priority_line.split('\t')[1].strip('"\n ')
                 description = description_line.split('\t')[1].strip('"\n ')
-                timestamp = description_line.split('\t')[1].strip('"\n ')
+                timestamp = timestamp_line.split('\t')[1].strip('"\n ')
 
                 if not (index and event_type and priority and description and timestamp):
                     print(f"Missing field in event at line {i}")
                     print(f"index: {index}, event: {event_type}, priority: {priority}, desc: {description}, time: {timestamp}")
                 else:
                     events.append({
-                        'index': index,
+                        'event_id': index,
                         'event_type': event_type,
                         'priority': priority,
                         'description': description,

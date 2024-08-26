@@ -3,7 +3,7 @@ from aiokafka import AIOKafkaProducer, AIOKafkaConsumer, errors, AIOKafkaClient
 import asyncio
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 # import random
 import json
 from pydantic import BaseModel, ValidationError
@@ -64,7 +64,7 @@ class Event(BaseModel):
     event_type: str
     priority: str
     description: str
-    timestamp: datetime
+    timestamp: str
 
 # Define Worker class
 class Worker:
@@ -226,7 +226,7 @@ async def consume_events():
         async for msg in consumer:
             event_data = json.loads(msg.value.decode("utf-8"))
             if 'event_id' not in event_data or 'timestamp' not in event_data:
-                logger.error(f"Missing field: {event_data}")
+                logger.error(f"229Missing field: {event_data}")
                 continue
             try:
                 event = Event(**event_data)
