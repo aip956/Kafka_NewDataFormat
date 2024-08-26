@@ -7,6 +7,7 @@ from datetime import datetime
 # import random
 import json
 from pydantic import BaseModel, ValidationError
+from typing import List
 
 
 
@@ -156,7 +157,7 @@ async def dispatch_event(event):
         if teams:
             for team_name in teams:
                 team = await get_team_for_event(team_name)
-                logger.info(f"Handled {event_type} event {event_id} with team {team_name}")
+                logger.info(f"Dispatched {event_type} event {event_id} with team {team_name}")
         else:
             logger.warning(f"161Unknown event type: {event_type}")
     except Exception as e:
@@ -192,10 +193,11 @@ def get_stress_level():
     logger.info(f"Returning stress level: {stress_level}")
     return {"stress_level": stress_level}
 
-@app.get("/events")
-def get_events():
+@app.get("/events", response_model=List[Event])
+async def get_events():
     logger.info(f"Returning events: {events}")
-    return {"events": events}
+    # return {"events": events}
+    return events
 
 async def handle_event(event):
     global stress_level
