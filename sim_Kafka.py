@@ -2,6 +2,7 @@ import asyncio
 from aiokafka import AIOKafkaProducer
 import json
 import argparse
+from datetime import datetime
 
 KAFKA_BOOTSTRAP_SERVER = "localhost:9092"
 TOPIC = "wedding_events"
@@ -28,20 +29,57 @@ def read_events_data(file_path):
         lines = file.readlines()
 
     events = []
-    for i in range(0, len(lines), 4):
-        if i + 3 < len(lines):
-            index = lines[i].strip()
-            event_type = lines[i + 1].split('\t')[1].strip('"\n ')
-            priority = lines[i + 2].split('\t')[1].strip('"\n ')
-            description = lines[i + 3].split('\t')[1].strip('"\n ')
-            events.append({
-                'index': index,
-                'event_type': event_type,
-                'priority': priority,
-                'description': description
-            })
+    i = 0
+    while i < len(lines):
+        # Skip line if only a digit
+        if lines[i].strip().isdigit():
+            i += 1
+            continue
+        if i + 4 < len(lines):
+            try:
+                index_line = lines[i].strip()
+                event_type_line = lines[i + 1].strip()
+                priority_line = lines[i + 2].strip()
+                description_line = lines[i + 3].strip()
+                timestamp_line = lines[i + 4].strip()
+
+
+
+
+                if not (index_line.startswith("id\t") and 
+                        event_type_line.startswith("event_type\t") and 
+                        priority_line.startswith("priority\t") and 
+                        description_line.startswith("description\t") and 
+                        timestamp_line.startswith("timestamp\t")):
+                    print(f"Unexpected format event data line {i}")
+                    print(f"index: {index_line}, event: {event_type_line}, priority: {priority_line}, desc: {description_line}, time: {timestamp_line}")
+                    i += 5
+                    continue
+
+                index = index_line.split('\t')[1].strip('"\n ')
+                event_type = event_type_line.split('\t')[1].strip('"\n ')
+                priority = priority_line.split('\t')[1].strip('"\n ')
+                description = description_line.split('\t')[1].strip('"\n ')
+                timestamp = description_line.split('\t')[1].strip('"\n ')
+
+                if not (index and event_type and priority and description and timestamp):
+                    print(f"Missing field in event at line {i}")
+                    print(f"index: {index}, event: {event_type}, priority: {priority}, desc: {description}, time: {timestamp}")
+                else:
+                    events.append({
+                        'index': index,
+                        'event_type': event_type,
+                        'priority': priority,
+                        'description': description,
+                        'timestamp': timestamp
+                    })
+                i += 6
+            except IndexError as e:
+                print(f"Error parsing at line {i}: {e}")
+                break
         else:
             print(f"Incomplete event datastarting at line {i}")
+            break
     return events
 
 if __name__=="__main__":

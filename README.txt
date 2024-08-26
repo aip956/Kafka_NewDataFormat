@@ -19,7 +19,7 @@ message: Guest has stomach ache after eating 5 pieces of cake
 -- Then run data script to auto-send data:
 python3 data.py
 
-python3 sim_Kafka.py events_data.txt
+python3 sim_Kafka.py events_data1.txt
 sim_Kafka will run the data file
 events_data.txt is the data file
 
