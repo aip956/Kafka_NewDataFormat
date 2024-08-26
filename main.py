@@ -16,9 +16,6 @@ app = FastAPI()
 
 logger = logging.getLogger("uvicorn.error")
 
-# Worker status and routines
-# worker_status = {"Security": "Idle", "Clean_Up": "Idle", "Catering": "Idle", "Officiant": "Idle", "Waiters": "Idle"}
-# worker_routine = {"Security": "Standard", "Clean_Up": "Standard", "Catering": "Intermittent", "Officiant": "Concentrated", "Waiters": "Standard"}
 
 # Track events and stress levels
 events = []
@@ -41,6 +38,25 @@ consumer = None
 #     "Intermittent": (5, 5),
 #     "Concentrated": (60, 60)
 # }
+
+# Define Event class
+class Event:
+    def __init__(self, event_id, event_type, priority, description, timestamp):
+        self.event_id = event_id
+        self.event_type = event_type
+        self.priority = priority
+        self.description = description
+        self.timestamp = timestamp
+
+# Define Worker class
+class Worker:
+    def __init__(self, team, routine):
+        self.team = team 
+        self.routine = routine
+        self.status = "Idle"
+
+    
+
 
 # Event handler function
 async def handle_event(event):
@@ -105,27 +121,32 @@ async def on_shutdown():
 #     background_tasks.add_task(handle_event, event)
 #     logger.info(f"Event received: {event}")
 #     return {"message": "Event received"}
+@app.get("/")
+async def read_root():
+    return {"Hello": "world"}
 
 @app.get("/stress_level")
 def get_stress_level():
+    logger.info(f"Returning stress level: {stress_level}")
     return {"stress_level": stress_level}
 
 @app.get("/events")
 def get_events():
+    logger.info(f"Returning events: {events}")
     return {"events": events}
 
 # All the data topics
 # topics = ["person_fell", "broken_glass", "dirty_table", "brawl", "missing_rings", "missing_bride", "missing_groom", "feeling_ill", "injured_kid", "not_on_list", "bad_food", "music_too_loud", "music_too_low"]
 
 # New topics for v2 of assignment
-topics = ["brawl","not_on_list", "accident", "dirty_table", "broken_items", "dirty_floor", "bad_food", "music", "feeling_ill", "bride", "groom"]
+topics = ["accident", "bad_food", "brawl", "broken_glass", "broken_itens", "bride", "dirty_floor", "dirty_table", "feeling_ill", "groom", "injured_kid", "missing_bride", "missing_groom", "missing_rings", "music_too_loud", "music_too_low", "music", "not_on_list", "person_fell"]
 
-# SECURITY_TOPICS = ["brawl", "not_on_list", "person_fell", "injured_kid"]
-SECURITY_TOPICS = ["brawl", "not_on_list", "accident"]
-CLEAN_UP_TOPICS = ["dirty_table", "broken_items", "dirty_floor"] #Removed broken_glass, added dirty_floor
-CATERING_TOPICS = ["bad_food", "music", "feeling_ill"] #changed to just music
-OFFICIANT_TOPICS = ["bride", "groom"] # Changed to bride, groom
-WAITERS_TOPICS = [ "broken_items", "accident", "bad_food"]
+
+SECURITY_TOPICS = ["brawl", "not_on_list", "accident", "person_fell", "injured_kid"]
+CLEAN_UP_TOPICS = ["dirty_table", "broken_glass", "broken_itens", "dirty_floor"]
+CATERING_TOPICS = ["bad_food", "music", "music_too_loud", "music_too_low", "feeling_ill"]
+OFFICIANT_TOPICS = ["missing_rings", "missing_bride", "missing_groom", "bride", "groom"]
+WAITERS_TOPICS = [ "broken_glass", "person_fell", "injured_kid", "feeling_ill", "broken_itens", "accident", "bad_food"]
 
 
 loop = asyncio.get_event_loop()
