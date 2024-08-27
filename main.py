@@ -19,15 +19,28 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-# Global vars
-events = []
-stress_level = 0
-producer = None
-consumer = None
-
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER", "localhost:9092")
-TOPIC = "wedding_events"
+# TOPIC = "wedding_events"
+
+event_team_mapping = {
+    "wedding": ["team1", "team2"],
+    "conference": ["team3"]
+}
+
+stress_level = 0
+events = []
+
+# Define Event class
+class Event(BaseModel):
+    event_id: int
+    event_type: str
+    priority: str
+    description: str
+    timestamp: str
+
+loop = asyncio.get_event_loop()
+# producer = AIOKafkaProducer(loop=loop, bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
 
 # Timeframes for priorities in secs
 PRIORITY_TIMEFRAMES = {
@@ -48,24 +61,25 @@ WAITERS_TOPICS = [ "broken_glass", "person_fell", "injured_kid", "feeling_ill", 
 
 
 
+    
+@app.on_event("startup")
+async def on_startup():
+    global AIOKafkaProducer
+    producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
+    try:
+        await producer.start() # Start the Kafka producer
+        logger.info("Kafka producer started")
+        asyncio.create_task(consume_events())
+        logger.info("Kafka consumer task created")
+    except errors.KafkaConnectionError as e:
+        logger.error(f"Kafka connection error: {e}")
 
-# Initialize global vars for consuper and producer
+@app.on_event("shutdown")
+async def on_shutdown():
+    await producer.stop() # Stop the Kafka producer
+    logger.info("Kafka producer stopped")
 
 
-# Timeframes for worker routines in secs
-# ROUTINE_TIMEFRAMES = {
-#     "Standard": (20, 5),
-#     "Intermittent": (5, 5),
-#     "Concentrated": (60, 60)
-# }
-
-# Define Event class
-class Event(BaseModel):
-    event_id: int
-    event_type: str
-    priority: str
-    description: str
-    timestamp: str
 
 # Define Worker class
 class Worker:
@@ -78,12 +92,23 @@ class Worker:
         self.status = "Working"
         # Simulate event handling time based on routine and priority
         work_time = PRIORITY_TIMEFRAMES[event.priority]
+        start_time = datetime.now()
+
         if self.routine == "Standard":
-            await asyncio.sleep(work_time)
+            await asyncio.sleep(min(work_time, 20))
         elif self.routine == "Intermittent":
-            await asyncio.sleep(work_time * 1.5)
+            await asyncio.sleep(min(work_time, 5))
+            await asyncio.sleep(5) # Idle time
         elif self.routine == "Concentrated":
-            await asyncio.sleep(work_time * 0.5)
+            await asyncio.sleep(min(work_time, 60))
+
+        elapsed_time = (datetime.now() - start_time).seconds
+
+        if elapsed_time > work_time:
+            global stress_level
+            stress_level += 1
+            logger.warning(f"Event {event.event_id} not handled by {self.team}")
+
         self.status = "Idle"
         logger.info(f"Event {event.event_id} handled by {self.team}")
 
@@ -133,8 +158,7 @@ event_team_mapping = {
         "person_fell": ["Security", "Waiters"]
     }
 
-async def get_team_for_event(event_type):
-    return event_team_mapping.get(event_type, [None])[0]
+
 
 
 @app.post("/events")
@@ -142,10 +166,18 @@ async def receive_event(event: Event):
     valid_event_types = event_team_mapping.keys()
     if event.event_type not in valid_event_types:
         raise HTTPException(status_code=400, detail="Invalid event type")
-    events.append(event)
+    # events.append(event)
     logger.info(f"Received event: {event.event_id}")
-    await dispatch_event(event)
+    # await dispatch_event(event)
+    await produce_event_to_kafka(event)
     return{"status": "Event received"}
+
+async def produce_event_to_kafka(event):
+    try:
+        await producer.send_and_wait("events_topic", json.dumps(event.dict()).encode('utf-8'))
+        logger.info(f"Produced event: {event.event_id} to Kafka")
+    except errors.KafkaConnectionError as e:
+        logger.error(f"Kafka connection error: {e}")
 
 # Marry Me Organizer to dispatch events
 async def dispatch_event(event):
@@ -158,46 +190,47 @@ async def dispatch_event(event):
             for team_name in teams:
                 team = await get_team_for_event(team_name)
                 logger.info(f"Dispatched {event_type} event {event_id} with team {team_name}")
+                if not await team.assign_event(event):
+                    stress_level += 1
+                    logger.warning(f"Dispatched {event_type} event {event_id} not handled by team {team_name}. Stress level increased to {stress_level}")
         else:
-            logger.warning(f"161Unknown event type: {event_type}")
+            logger.warning(f"200Unknown event type: {event_type}")
     except Exception as e:
         stress_level += 1
         logger.warning (f"Event {event_id} could not be handled in time. Stress level increased to {stress_level}")
         logger.error(f"Error handling event {event_id}: {e}")
         
+async def get_team_for_event(event_type):
+    return event_team_mapping.get(event_type, [None])[0]
 
-    
-@app.on_event("startup")
-async def on_startup():
-    global producer
-    producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
-    await producer.start() # Start the Kafka producer
-    asyncio.create_task(consume_events()) #Start consuming Kafka events
-
-@app.on_event("shutdown")
-async def on_shutdown():
-    if producer:
-        await producer.stop() # Stop the Kafka producer
-    if consumer:
-        await consumer.stop() # Stop the Kafka consumer
-    logger.info("Kafka producer stopped")
-
-
-
-@app.get("/")
-async def read_root():
-    return {"Hello": "world"}
-
-@app.get("/stress_level")
-def get_stress_level():
-    logger.info(f"Returning stress level: {stress_level}")
-    return {"stress_level": stress_level}
-
-@app.get("/events", response_model=List[Event])
-async def get_events():
-    logger.info(f"Returning events: {events}")
-    # return {"events": events}
-    return events
+# Kafka consumer function
+async def consume_events():
+    consumer = AIOKafkaConsumer(
+        'wedding_events',
+        loop=loop,
+        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
+        group_id="event_group"
+    )
+    await consumer.start()
+    try:
+        async for msg in consumer:
+            event_data = json.loads(msg.value.decode("utf-8"))
+            if 'event_id' not in event_data or 'timestamp' not in event_data:
+                logger.error(f"229Missing field: {event_data}")
+                continue
+            try:
+                event = Event(**event_data)
+                events.append(event)
+                await dispatch_event(event)
+                logger.info(f"230Consumed and processed event: {event.event_type}")
+            except ValidationError as e:
+                logger.error(f"Validation error for event data: {event_data} - {e.errors()}")
+            except Exception as e:
+                logger.error(f"Validation error for event data: {event_data} - {e}")
+    except errors.KafkaError as e:
+        logger.error(f"Kafka error: {e}")
+    finally:
+        await consumer.stop()
 
 async def handle_event(event):
     global stress_level
@@ -215,32 +248,23 @@ async def handle_event(event):
         logger.warning(f"Event {event_id} could not be handled in tiem. Stress level increased to {stress_level}")
         logger.error(f"Error handling event {event_id}: {e}")
 
-# Kafka consumer function
-async def consume_events():
-    global consumer
-    consumer = AIOKafkaConsumer(
-        TOPIC,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
-        group_id="wedding_group"
-    )
-    await consumer.start()
-    try:
-        async for msg in consumer:
-            event_data = json.loads(msg.value.decode("utf-8"))
-            if 'event_id' not in event_data or 'timestamp' not in event_data:
-                logger.error(f"229Missing field: {event_data}")
-                continue
-            try:
-                event = Event(**event_data)
-                await dispatch_event(event)
-                logger.info(f"230Consumed and processed event: {event.event_type}")
-            except ValidationError as e:
-                logger.error(f"Validation error for event data: {event_data} - {e.errors()}")
-            except Exception as e:
-                logger.error(f"Validation error for event data: {event_data} - {e}")
+@app.get("/")
+async def read_root():
+    return {"Hello": "world"}
 
-    finally:
-        await consumer.stop()
+@app.get("/stress_level")
+def get_stress_level():
+    logger.info(f"Returning stress level: {stress_level}")
+    return {"stress_level": stress_level}
+
+@app.get("/events", response_model=List[Event])
+async def get_events():
+    logger.info(f"Returning events: {events}")
+    # return {"events": events}
+    return events
+
+
+
 
 if __name__ == "__main__":
     import uvicorn
@@ -249,7 +273,7 @@ if __name__ == "__main__":
 
 
 
-# loop = asyncio.get_event_loop()
+
 # producer = AIOKafkaProducer(loop=loop, bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
 
 # consumed_messages = []
