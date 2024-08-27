@@ -21,12 +21,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVER = os.getenv("KAFKA_BOOTSTRAP_SERVER", "localhost:9092")
-# TOPIC = "wedding_events"
 
-event_team_mapping = {
-    "wedding": ["team1", "team2"],
-    "conference": ["team3"]
-}
 
 stress_level = 0
 events = []
@@ -163,8 +158,6 @@ event_team_mapping = {
     }
 
 
-
-
 @app.post("/events")
 async def receive_event(event: Event):
     valid_event_types = event_team_mapping.keys()
@@ -290,8 +283,7 @@ if __name__ == "__main__":
 
 
 
-# producer = AIOKafkaProducer(loop=loop, bootstrap_servers=KAFKA_BOOTSTRAP_SERVER)
-
+# For getting events by team
 # consumed_messages = []
 # security_messages = []
 # clean_up_messages = []
