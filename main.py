@@ -87,30 +87,34 @@ class Worker:
         self.team = team 
         self.routine = routine
         self.status = "Idle"
+        self.last_active_time = datetime.now()
 
     async def handle_event(self, event):
         self.status = "Working"
         # Simulate event handling time based on routine and priority
-        work_time = PRIORITY_TIMEFRAMES[event.priority]
-        start_time = datetime.now()
-
-        if self.routine == "Standard":
-            await asyncio.sleep(min(work_time, 20))
-        elif self.routine == "Intermittent":
-            await asyncio.sleep(min(work_time, 5))
-            await asyncio.sleep(5) # Idle time
-        elif self.routine == "Concentrated":
-            await asyncio.sleep(min(work_time, 60))
-
-        elapsed_time = (datetime.now() - start_time).seconds
-
-        if elapsed_time > work_time:
-            global stress_level
-            stress_level += 1
-            logger.warning(f"Event {event.event_id} not handled by {self.team}")
-
+        await asyncio.sleep(3) # 3 secs to handle event
         self.status = "Idle"
+        self.last_active_time = datetime.now()
         logger.info(f"Event {event.event_id} handled by {self.team}")
+
+        # work_time = PRIORITY_TIMEFRAMES[event.priority]
+        # start_time = datetime.now()
+    async def simulate_routine(self):
+        while True:
+            if self.routine == "Standard":
+                await asyncio.sleep(20)
+                self.status = "Idle"
+                await asyncio.sleep(5)
+            elif self.routine == "Intermittent":
+                await asyncio.sleep(5) # Simulate short working time
+                self.status = "Idle"
+                await asyncio.sleep(5) # Idle time
+            elif self.routine == "Concentrated":
+                await asyncio.sleep(60)
+                self.status = "Idle"
+                await asyncio.sleep(60)
+            self.status = "Working"
+
 
 # Define Team class
 class Team:
@@ -187,14 +191,23 @@ async def dispatch_event(event):
         event_id = event.event_id
         teams = event_team_mapping.get(event_type)
         if teams:
+            event_handled = False
             for team_name in teams:
                 team = await get_team_for_event(team_name)
                 logger.info(f"Dispatched {event_type} event {event_id} with team {team_name}")
-                if not await team.assign_event(event):
-                    stress_level += 1
-                    logger.warning(f"Dispatched {event_type} event {event_id} not handled by team {team_name}. Stress level increased to {stress_level}")
+                if team:
+                    logger.info(f"Dispatched {event_type} event {event_id} by team {team_name}.")
+                    if await team.assign_event(event):
+                        event_handled = True
+                        break
+                    else:
+                        logger.warning(f"Team {team_name} unable to handle event type {event_type} eventID {event_id}")
+            if not event_handled:
+                stress_level += 1
+                logger.warning(f"Dispatched {event_type} event {event_id} not handled by team {team_name}. Stress level increased to {stress_level}")
         else:
-            logger.warning(f"200Unknown event type: {event_type}")
+            stress_level += 1
+            logger.warning(f"200Unknown team or event type: {event_type}. Stress level increased to {stress_level}")
     except Exception as e:
         stress_level += 1
         logger.warning (f"Event {event_id} could not be handled in time. Stress level increased to {stress_level}")
