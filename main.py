@@ -192,6 +192,7 @@ async def dispatch_event(event):
         teams = event_team_mapping.get(event_type)
         if teams:
             event_handled = False
+            start_time = datetime.now()
             for team_name in teams:
                 team = await get_team_for_event(team_name)
                 logger.info(f"Dispatched {event_type} event {event_id} with team {team_name}")
@@ -203,8 +204,10 @@ async def dispatch_event(event):
                     else:
                         logger.warning(f"Team {team_name} unable to handle event type {event_type} eventID {event_id}")
             if not event_handled:
-                stress_level += 1
-                logger.warning(f"Dispatched {event_type} event {event_id} not handled by team {team_name}. Stress level increased to {stress_level}")
+                elapsed_time = (datetime.now() - start_time).seconds
+                if elapsed_time > PRIORITY_TIMEFRAMES[event.priority]:
+                    stress_level += 1
+                    logger.warning(f"Dispatched {event_type} event {event_id} not handled by team {team_name}. Stress level increased to {stress_level}")
         else:
             stress_level += 1
             logger.warning(f"200Unknown team or event type: {event_type}. Stress level increased to {stress_level}")
