@@ -192,12 +192,15 @@ async def dispatch_event(event):
         event_id = event.event_id
         teams = event_team_mapping.get(event_type)
         logger.info(f"194Event {event_id} of type {event_type} mapped to team {teams}")
+        
         if teams:
             event_handled = False
             start_time = datetime.now()
+
             for team_name in teams:
                 team = await get_team_for_event(team_name)
                 logger.info(f"200Dispatched {event_type} event {event_id} with team {team_name}")
+                
                 if team:
                     logger.info(f"202Adding {event_type} event {event_id} by team {team_name}.")
                     # Store event in event type list
@@ -218,7 +221,8 @@ async def dispatch_event(event):
 
                     if await team.assign_event(event):
                         event_handled = True
-                        break
+                        logger.info(f"Event {event_id} handled by team {team_name}")
+                        # break
                     else:
                         logger.warning(f"Team {team_name} unable to handle event type {event_type} eventID {event_id}")
             if not event_handled:
