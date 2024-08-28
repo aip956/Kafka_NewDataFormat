@@ -17,9 +17,8 @@ message: Guest has stomach ache after eating 5 pieces of cake
 - Should return code 200
 - Alternatively, can start the servers (docker-compose up -d) and the app (uvicorn main:app --reload)
 -- Then run data script to auto-send data:
-python3 data.py
 
-python3 sim_Kafka.py events_data1.txt
+**python3 sim_Kafka.py events_data1.txt**
 sim_Kafka will run the data file
 events_data.txt is the data file
 

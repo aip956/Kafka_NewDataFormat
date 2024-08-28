@@ -186,30 +186,35 @@ async def produce_event_to_kafka(event):
 
 # Marry Me Organizer to dispatch events
 async def dispatch_event(event):
-    global stress_level
+    global stress_level, security_messages, clean_up_messages, catering_messages, officiant_messages, waiters_messages
     try:
         event_type = event.event_type
         event_id = event.event_id
         teams = event_team_mapping.get(event_type)
+        logger.info(f"194Event {event_id} of type {event_type} mapped to team {teams}")
         if teams:
             event_handled = False
             start_time = datetime.now()
             for team_name in teams:
                 team = await get_team_for_event(team_name)
-                logger.info(f"Dispatched {event_type} event {event_id} with team {team_name}")
+                logger.info(f"200Dispatched {event_type} event {event_id} with team {team_name}")
                 if team:
-                    logger.info(f"Dispatched {event_type} event {event_id} by team {team_name}.")
+                    logger.info(f"202Adding {event_type} event {event_id} by team {team_name}.")
                     # Store event in event type list
                     if team_name == "Security":
                         security_messages.append(event)
+                        logger.info(f"Appended security_messages: {security_messages}")
                     elif team_name == "Clean_Up":
                         clean_up_messages.append(event)
                     elif team_name == "Catering":
                         catering_messages.append(event)
+                        logger.info(f"Appended catering_messages: {catering_messages}")
                     elif team_name == "Officiant":
                         officiant_messages.append(event)
+                        logger.info(f"Appended officiant_messages: {officiant_messages}")
                     elif team_name == "Waiters":
                         waiters_messages.append(event)
+                        logger.info(f"Appended waiters_messages: {waiters_messages}")
 
                     if await team.assign_event(event):
                         event_handled = True
@@ -229,8 +234,13 @@ async def dispatch_event(event):
         logger.warning (f"Event {event_id} could not be handled in time. Stress level increased to {stress_level}")
         logger.error(f"Error handling event {event_id}: {e}")
         
-async def get_team_for_event(event_type):
-    return event_team_mapping.get(event_type, [None])[0]
+async def get_team_for_event(team_name):
+    team = teams.get(team_name)
+    if team:
+        logger.info(f"240 team_name: {team_name}")
+    else:
+        logger.warning(f"242Team {team_name} not found")
+    return team
 
 # Kafka consumer function
 async def consume_events():
