@@ -1,11 +1,15 @@
 To run:
-cd into Kafka_Consumer_Producer
+cd into Kafka_Consumer_Producer_NewDataFormat
+start Docker
 
 In terminal:
 Start/build the container:
 docker-compose up -d
 Start the app:
 uvicorn main:app --reload
+(you might need to save a file to get it to reload)
+open another terminal
+run the sim file: python3 sim_Kafka.py events_data1.txt
 
 Access FastAPI Swagger:
 http://127.0.0.1:8000/docs
